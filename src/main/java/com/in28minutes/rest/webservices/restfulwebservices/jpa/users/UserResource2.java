@@ -1,7 +1,12 @@
-package com.in28minutes.rest.webservices.restfulwebservices.user;
+package com.in28minutes.rest.webservices.restfulwebservices.jpa.users;
 
+import com.in28minutes.rest.webservices.restfulwebservices.jpa.UserRepository;
+import com.in28minutes.rest.webservices.restfulwebservices.user.User;
+import com.in28minutes.rest.webservices.restfulwebservices.user.UserNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,27 +14,26 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import java.util.Optional;
 
 @RestController
-public class UserResource {
-    private UserDaoService service;
+public class UserResource2 {
+    private UserRepository repository;
 
-    public UserResource(UserDaoService service) {
-        this.service = service;
+    public UserResource2(UserRepository repository) {
+        this.repository = repository;
     }
 
-    @GetMapping("/users")
+    @GetMapping("/jpa/users")
     public List<User> retieveAllUsers() {
-        return service.findAll();
+        return repository.findAll();
     }
 
     // 사용자 생성하는 메서드
     // ResponseEntity : HTTP 응답 표현
-    @PostMapping("/users")
+    @PostMapping("/jpa/users")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = service.save(user);
+        User savedUser = repository.save(user);
         // ServletUriComponentsBuilder : 현재 요청 URI를 가져와 새 URI를 생성
         // path : 생성된 URI에 경로 추가 (동적)
         // buildAndExpand : 경로에 들어갈 동적 값
@@ -44,15 +48,15 @@ public class UserResource {
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/users/{id}")
-    public EntityModel<User> retieveUsers(@PathVariable int id) {
+    @GetMapping("/jpa/users/{id}")
+    public EntityModel<Optional<User>> retieveUsers(@PathVariable int id) {
         // 해당 ID를 가진 사용자를 데이터베이스에서 검색
-        User user = service.findOne(id);
-        if (user == null)
+        Optional<User> user = repository.findById(id);
+        if (user.isEmpty())
             throw new UserNotFoundException("id : " + id);
 
         // HATEOAS를 이용해 리소스와 관련된 링크 생성
-        EntityModel<User> entityModel = EntityModel.of(user);
+        EntityModel<Optional<User>> entityModel = EntityModel.of(user);
         // 현재 메서드(retieveAllUsers)에 대한 링크 생성
         WebMvcLinkBuilder link = WebMvcLinkBuilder.linkTo(methodOn(this.getClass()).retieveAllUsers());
         // 생성된 링크를 'all-users'라는 관계(rel)로 추가하여 리턴
@@ -60,8 +64,8 @@ public class UserResource {
         return entityModel;
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/jpa/users/{id}")
     public void deleteUsers(@PathVariable int id) {
-        service.deleteById(id);
+        repository.deleteById(id);
     }
 }

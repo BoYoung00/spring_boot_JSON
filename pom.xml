@@ -26,6 +26,36 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!--HAL브라우저 제공, 모든 링크 모아둠-->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-hal-explorer</artifactId>
+		</dependency>
+
+		<!--애플리케이션을 모니터링, 관리하기 위한 스타터 의존성-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!--HATEOAS, 하이퍼링크로 상태를 관리-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
+
+<!--		&lt;!&ndash;XML을 자바 객체로 매핑 or 자바 객체를 XML로 직렬화 도구&ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>com.fasterxml.jackson.dataformat</groupId>-->
+<!--			<artifactId>jackson-dataformat-xml</artifactId>-->
+<!--		</dependency>-->
+<!--		&lt;!&ndash;REST API 기반 정보 확인&ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>org.springdoc</groupId>-->
+<!--			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+<!--			<version>2.3.0</version>-->
+<!--		</dependency>-->
+
 		<!--유효성 검사-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -40,6 +70,7 @@
 <!--			<scope>runtime</scope>-->
 <!--			<optional>true</optional>-->
 <!--		</dependency>-->
+		<!--H2-->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
