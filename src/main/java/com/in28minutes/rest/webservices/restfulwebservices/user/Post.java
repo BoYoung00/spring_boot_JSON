@@ -1,16 +1,21 @@
 package com.in28minutes.rest.webservices.restfulwebservices.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Post {
     @Id
     @GeneratedValue // 기본키 값 자동 생성
     private Integer id;
+
+    @Size(min = 5)
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY) // 지연로딩, 즉시로딩
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     public Post(Integer id, String description, User user) {
@@ -37,6 +42,14 @@ public class Post {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

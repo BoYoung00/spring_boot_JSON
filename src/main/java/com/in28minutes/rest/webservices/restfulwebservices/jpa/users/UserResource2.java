@@ -1,6 +1,8 @@
 package com.in28minutes.rest.webservices.restfulwebservices.jpa.users;
 
+import com.in28minutes.rest.webservices.restfulwebservices.jpa.PostRepository;
 import com.in28minutes.rest.webservices.restfulwebservices.jpa.UserRepository;
+import com.in28minutes.rest.webservices.restfulwebservices.user.Post;
 import com.in28minutes.rest.webservices.restfulwebservices.user.User;
 import com.in28minutes.rest.webservices.restfulwebservices.user.UserNotFoundException;
 import jakarta.validation.Valid;
@@ -18,22 +20,25 @@ import java.util.Optional;
 
 @RestController
 public class UserResource2 {
-    private UserRepository repository;
+    private UserRepository userRepository;
 
-    public UserResource2(UserRepository repository) {
-        this.repository = repository;
+    private PostRepository postRepository;
+
+    public UserResource2(UserRepository userRepository, PostRepository postRepository) {
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
     }
 
     @GetMapping("/jpa/users")
     public List<User> retieveAllUsers() {
-        return repository.findAll();
+        return userRepository.findAll();
     }
 
     // 사용자 생성하는 메서드
     // ResponseEntity : HTTP 응답 표현
     @PostMapping("/jpa/users")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = repository.save(user);
+        User savedUser = userRepository.save(user);
         // ServletUriComponentsBuilder : 현재 요청 URI를 가져와 새 URI를 생성
         // path : 생성된 URI에 경로 추가 (동적)
         // buildAndExpand : 경로에 들어갈 동적 값
@@ -48,10 +53,30 @@ public class UserResource2 {
         return ResponseEntity.created(location).build();
     }
 
+    @PostMapping("/jpa/users/{id}/posts")
+    public ResponseEntity<Object> createPostForUser(@PathVariable int id, @Valid @RequestBody Post post) {
+        // 해당 ID를 가진 사용자를 데이터베이스에서 검색
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty())
+            throw new UserNotFoundException("id : " + id);
+
+        post.setUser(user.get());
+        Post savePost = postRepository.save(post);
+
+        // URI
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savePost.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).build();
+    }
+
     @GetMapping("/jpa/users/{id}")
     public EntityModel<Optional<User>> retieveUsers(@PathVariable int id) {
         // 해당 ID를 가진 사용자를 데이터베이스에서 검색
-        Optional<User> user = repository.findById(id);
+        Optional<User> user = userRepository.findById(id);
         if (user.isEmpty())
             throw new UserNotFoundException("id : " + id);
 
@@ -66,6 +91,14 @@ public class UserResource2 {
 
     @DeleteMapping("/jpa/users/{id}")
     public void deleteUsers(@PathVariable int id) {
-        repository.deleteById(id);
+        userRepository.deleteById(id);
+    }
+    @GetMapping("/jpa/users/{id}/posts")
+    public List<Post> retrievePostsForUser(@PathVariable int id) {
+        // 해당 ID를 가진 사용자를 데이터베이스에서 검색
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty())
+            throw new UserNotFoundException("id : " + id);
+        return user.get().getPosts();
     }
 }
